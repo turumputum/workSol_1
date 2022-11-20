@@ -1,0 +1,19 @@
+
+extends layout.pug
+
+
+block content
+    link(type="text/css" href="bootstrap5-toggle/css/bootstrap5-toggle.css" rel="stylesheet")
+    script(src="bootstrap5-toggle/js/bootstrap5-toggle.min.js")
+
+    div(style='padding-top: 56px;').container-xxl
+        main.container-xxl.my-4.d-flex.justify-content-center
+            .row
+                .col.m-4
+                    include cards/netSettings-card.pug
+                .col.m-4
+                    include cards/time_and_statusCard.pug
+
+    
+    
+
