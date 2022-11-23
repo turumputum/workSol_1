@@ -98,6 +98,60 @@ $('#editPlaylistModal').on('shown.bs.modal', function(){
     update_playlist_modal()
 })
 
+//----------------------Delete playlist----------------------------
+var confirm_delete = document.getElementById('verify_delete')
+var delete_index = 0
+confirm_delete.addEventListener('show.bs.modal', function (event) {
+    var delete_button = event.relatedTarget
+
+    var modal_header_task_name = confirm_delete.querySelector('.name_to_delete')
+
+    modal_header_task_name.innerHTML = delete_button.getAttribute('d-name')
+    delete_index = delete_button.getAttribute('d-index')
+})
+
+async function delete_playlist(index){
+    var modal_header_task_name = confirm_delete.querySelector('.name_to_delete')
+    //var delete_button = event.relatedTarget
+    var data = {
+        index_to_delete : delete_index,
+        name_to_delete: modal_header_task_name.innerHTML
+    }
+    console.log('Playlist name to delete: ' + data.index_to_delete)
+    fetch('/delete_playlist', {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: JSON.stringify(data)
+    }).then((res) => {
+        console.log("delete POST OK:", res)
+        window.location.reload();
+        }).catch((err) => {
+        console.log(err)
+        })
+}
+
+async function fetch_post_playlist(path, playlist) {
+    outData = {
+        path: path,
+        playlist: playlist
+    }
+    return fetch('/save_playlist', {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: JSON.stringify(outData)
+    }).then((res) => {
+        console.log("New task POST OK, res: ", res)
+        //window.location.reload();
+        }).catch((err) => {
+        console.log(err)
+    })
+}
 //------------------------TRACK MODAL-------------------------
 
 function open_edit_track_modal(index) {
@@ -367,22 +421,3 @@ async function fetch_get_playlist(){
     })
 }
 
-async function fetch_post_playlist(path, playlist) {
-    outData = {
-        path: path,
-        playlist: playlist
-    }
-    return fetch('/save_playlist', {
-        method: 'POST',
-        headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: JSON.stringify(outData)
-    }).then((res) => {
-        console.log("New task POST OK, res: ", res)
-        //window.location.reload();
-        }).catch((err) => {
-        console.log(err)
-    })
-}

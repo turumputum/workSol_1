@@ -64,7 +64,8 @@ function merge_config() {
   }
 }
 
-set_config()
+setTimeout(set_config, 3000)
+
 
 data_watcher.on('change', function (evt, name) {
   if (name == '../data/usb/config.json') {
