@@ -42,7 +42,7 @@ const mqtt = require("mqtt");
 var currentPage = "home";
 var configAndStatus = "";
 
-const port = +process.env.PORT || 80;
+const port = +process.env.PORT || 3000
 
 const app = express();
 const http = app.listen(port);
@@ -912,7 +912,67 @@ app.get("/Settings", (req, res) => {
   });
 });
 
+app.post("/save_config",(req, res) => {
+  //const playlist = JSON.parse(Object.keys(req.body)[0])
+  const inData = JSON.parse(Object.keys(req.body)[0])
 
+  try{
+    fs.writeFileSync('../meta/config.json', JSON.stringify(inData,null,2))
+    console.log(`Config save OK`)
+  }catch(err){
+    console.warn(`Write config error: ${err}`)
+  }
+
+  return res.end('done')
+});
+
+
+//----------------System------------------------------
+app.get("/get_time",(req, res) => {
+  let date_ob = new Date();
+
+  res.send({
+    h: date_ob.getHours(),
+    m: date_ob.getMinutes() 
+  })
+});
+
+
+app.get("/get_date",(req, res) => {
+  let date_ob = new Date();
+
+  res.send({
+    d: date_ob.getDay(),
+    m: date_ob.getMonth(),
+    y: date_ob.getFullYear()
+  })
+});
+
+app.post("/set_time",(req, res) => {
+
+  
+  //const playlist = JSON.parse(Object.keys(req.body)[0])
+  const inData = JSON.parse(Object.keys(req.body)[0])
+  console.log(`input time: ${inData.time} date: ${inData.date}`)
+
+  try{
+    let config = JSON.parse(fs.readFileSync('../meta/config.json'))
+    config.time.NTP = '0'
+    fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
+  }catch(err){
+    console.warn(`Write ntp config error: ${err}`)
+  }
+
+
+  // try{
+  //   fs.writeFileSync('../meta/config.json', JSON.stringify(inData,null,2))
+  //   console.log(`Config save OK`)
+  // }catch(err){
+  //   console.warn(`Write config error: ${err}`)
+  // }
+
+  return res.end('done')
+});
 
 // fs.readdir('../data/playlists', function(err, list){
 //   if (err) return done(err);

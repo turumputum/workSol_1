@@ -1,7 +1,7 @@
 extends layout.pug
 
 //----------------------Fill main table data----------------------------
-mixin table-row(index, name, path, type, start_time, end_time, day_of_week, id_md5)
+mixin table-row(index, name, path, type, start_time, end_time, day_of_week)
     tr  
         td.w-5(data-label="#")= index 
         td(data-label="Name")= name 
@@ -46,7 +46,7 @@ block content
                         each task, index in tasks
                             - var pt_ind = playlist_table.findIndex(o => o.path == task.path)
                             //- console.log(playlist_table[0].name)
-                            +table-row(index+1, playlist_table[pt_ind].name, playlist_table[pt_ind].path, playlist_table[pt_ind].type, task.start_time, task.end_time, task.day_of_week, task.id_md5)
+                            +table-row(index+1, playlist_table[pt_ind].name, playlist_table[pt_ind].path, playlist_table[pt_ind].type, task.start_time, task.end_time, task.day_of_week)
                         
                         tr
                             td(colspan='7')

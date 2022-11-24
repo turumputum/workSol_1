@@ -12,8 +12,25 @@ block content
                 .col.m-4
                     include cards/netSettings-card.pug
                 .col.m-4
-                    include cards/time_and_statusCard.pug
+                    include cards/timeSettings-card.pug
 
     
     
+    script.
+        let config = !{JSON.stringify(config)}
 
+        function fetch_save_config(){
+            fetch('/save_config', {
+                method: 'POST',
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: JSON.stringify(config)
+            }).then((res) => {
+                console.log("POST config OK, res: ", res)
+                //window.location.reload();
+                }).catch((err) => {
+                console.log(err)
+            })
+        }

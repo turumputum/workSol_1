@@ -145,8 +145,8 @@ async function set_config(){
   if(config.time.NTP=='1'){
     try{
       await execSudoPromise(`timedatectl set-ntp true`)
-      await execSudoPromise(`timedatectl set-timezone Etc/GMT${config.time.time_zone}`)
-      console.log("Set NTP true OK, time zone: " + config.time.time_zone)
+      await execSudoPromise(`timedatectl set-timezone Etc/GMT${parseInt(config.time.time_zone)*-1}`)
+      console.log("Set NTP true OK, time zone: " + parseInt(config.time.time_zone)*-1)
     }catch{
     }
   }else if(config.time.NTP=='1'){
