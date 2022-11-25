@@ -41,7 +41,7 @@ const mqtt = require("mqtt");
 var currentPage = "home";
 var configAndStatus = "";
 
-const port = +process.env.PORT || 80
+const port = +process.env.PORT || 3000
 
 const app = express();
 const http = app.listen(port);

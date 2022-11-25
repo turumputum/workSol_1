@@ -1,3 +1,4 @@
+require('log-timestamp');
 let mpv = require('node-mpv');
 const fs = require("fs");
 const path = require("path");
@@ -352,7 +353,7 @@ function shift_simple_track(dir) {
 
 
 let mpvPlayer = new mpv({
-  //"binary":'C:/Users/Yac/mpv_dist/mpv.exe'
+  "binary":'C:/Users/Yac/mpv_dist/mpv.exe'
 }, [
   "--fullscreen",
 ]);
