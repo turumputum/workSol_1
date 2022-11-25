@@ -111,6 +111,7 @@ async function set_config(){
         config.net.DNS=rawData[index+1].split(' ')[1]
         console.log("DNS: "+ config.net.DNS)
       }
+      fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
 
     }catch(err){      
       console.log("Set DHCP fail: "+ err); 

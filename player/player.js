@@ -20,7 +20,7 @@ try {
   var config = JSON.parse(fs.readFileSync('../meta/config.json'))
 } catch (err) {
   console.error(`Error read file: ${err}`)
-  log_file(`Error read file: ${err}`, '../logs/player_log.txt')
+  log_file(`Error read file: ${err}`, '../logs/player_log.log')
   process.exit(1);
 }
 
@@ -31,7 +31,7 @@ function read_playlist(path) {
     playlist = JSON.parse(fs.readFileSync('../' + path))
   } catch (err) {
     console.error(`Error read playlist: ${err}`)
-    log_file(`Error read playlist: ${err}`, '../logs/player_log.txt')
+    log_file(`Error read playlist: ${err}`, '../logs/player_log.log')
     process.exit(1);
   }
   simple_track_num = 0
@@ -232,7 +232,7 @@ function mqtt_sub(topic) {
   if (client.subscribe(topic, function (err) {
     if (err) {
       console.error(`subscribe to: ${topic} filed: ${err}`)
-      log_file(`subscribe to: ${topic} filed: ${err}`, '../logs/player_log.txt')
+      log_file(`subscribe to: ${topic} filed: ${err}`, '../logs/player_log.log')
       return err
     } else {
       //console.log(`subscribe OK to: ${topic}`)
@@ -275,7 +275,7 @@ function play_track(index) {
     //return true
   } catch (err) {
     console.error(`Play track failed: ${playlist.tracks[index].name} Error: ${err}`)
-    log_file(`Play track failed: ${playlist.tracks[index].name} Error: ${err}`, '../logs/player_log.txt')
+    log_file(`Play track failed: ${playlist.tracks[index].name} Error: ${err}`, '../logs/player_log.log')
     return false
   }
   if (flag_mqtt_ok == 1) {
@@ -299,7 +299,7 @@ function stop_track(index) {
     mpvPlayer.stop()
   } catch {
     console.error(`Stop track failed: ${playlist.tracks[index].name} Error: ${err}`)
-    log_file(`Stop track failed: ${playlist.tracks[index].name} Error: ${err}`, '../logs/player_log.txt')
+    log_file(`Stop track failed: ${playlist.tracks[index].name} Error: ${err}`, '../logs/player_log.log')
     return false
   }
   if (flag_mqtt_ok == 1) {

@@ -106,9 +106,13 @@ playlist_watcher.on('change', function (evt, name) {
 })
 
 meta_watcher.on('change', function (evt, name) {
-  if (name == '../meta/config.json') {
+  let flag_busy
+  if ((name == '../meta/config.json')&&(flag_busy=0)) {
     console.log("Let's set config")
+    flag_busy=1
+    set_config()
+    flag_busy=0
   }
-  set_config()
+  
 })
 

@@ -21,6 +21,8 @@ const fs = require("fs");
 const rimraf = require("rimraf");
 const path = require("path");
 
+const { exec } = require('child_process');
+
 //const filesize = require("filesize");
 //const dirTree = require('directory-tree');
 //const recursiveFilter = require("recursive-filter");
@@ -34,15 +36,12 @@ const mqtt = require("mqtt");
 //const client  = mqtt.connect('mqtt://127.0.0.1:1883')
 
 //var os = require('os');
-// var osu = require('node-os-utils')
-// var cpu = osu.cpu
-// var drive = osu.drive
-// var mem = osu.mem
+
 
 var currentPage = "home";
 var configAndStatus = "";
 
-const port = +process.env.PORT || 3000
+const port = +process.env.PORT || 80
 
 const app = express();
 const http = app.listen(port);
@@ -937,7 +936,6 @@ app.get("/get_time",(req, res) => {
   })
 });
 
-
 app.get("/get_date",(req, res) => {
   let date_ob = new Date();
 
@@ -949,11 +947,16 @@ app.get("/get_date",(req, res) => {
 });
 
 app.post("/set_time",(req, res) => {
-
-  
   //const playlist = JSON.parse(Object.keys(req.body)[0])
   const inData = JSON.parse(Object.keys(req.body)[0])
   console.log(`input time: ${inData.time} date: ${inData.date}`)
+
+  exec(`date -s '${inData.date} ${inData.time}'`, (error, stdout, stderr) => {
+    if (error) {
+      console.warn(error)
+    }
+    console.log(`Set time: '${inData.date} ${inData.time}' resault ${stdout}`)
+  })
 
   try{
     let config = JSON.parse(fs.readFileSync('../meta/config.json'))
@@ -962,17 +965,64 @@ app.post("/set_time",(req, res) => {
   }catch(err){
     console.warn(`Write ntp config error: ${err}`)
   }
-
-
-  // try{
-  //   fs.writeFileSync('../meta/config.json', JSON.stringify(inData,null,2))
-  //   console.log(`Config save OK`)
-  // }catch(err){
-  //   console.warn(`Write config error: ${err}`)
-  // }
-
   return res.end('done')
 });
+
+function execPromise(cmd) {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) {
+        console.warn(error)
+      }
+      //console.log(`sudo exec: ${cmd} resault ${stdout}`)
+      resolve(stdout? stdout : stderr);
+    })
+  })
+ }
+
+app.get("/get_system_status",(req, res) => {
+  var osu = require('node-os-utils')
+  var cpu = osu.cpu
+  var drive = osu.drive
+  var mem = osu.mem
+  let status
+  Promise.all([
+    cpu.usage(),
+    drive.info(),
+    mem.info(),
+    execPromise(`cat /etc/armbianmonitor/datasources/soctemp`)
+  ]).then(responses =>{
+    //console.log(JSON.stringify(responses, null,2))
+
+    status={
+      cpu_load: responses[0],
+      ram_usage: `${parseFloat(responses[2].usedMemMb/1000).toFixed(1)}/${parseFloat(responses[2].totalMemMb/1000).toFixed(1)}`,
+      hdd_usage: `${responses[1].usedGb}/${responses[1].totalGb}`,
+      soc_temp: Math.round(parseInt(responses[3])/1000)
+    }
+
+    res.send({
+      status:status
+    })
+  })
+  
+  
+  
+  // execPromise(`cat /etc/armbianmonitor/datasources/soctemp`)
+  // .then((res) => {
+  //   status.cpu_temp = Math.round(parseInt(res)/1000)
+  //   console.log(`Get temp resault ${status.cpu_temp}`)
+
+    
+  // }).then(()=>{
+    
+  // })
+  // status.cpu_temp = parseInt(stdout)/1000
+  // console.log(`Get temp resault ${status.cpu_temp}`) 
+
+  
+});
+
 
 // fs.readdir('../data/playlists', function(err, list){
 //   if (err) return done(err);

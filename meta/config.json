@@ -1,17 +1,17 @@
 {
   "net": {
     "device": "",
-    "DHCP": 0,
-    "IP": "192.168.88.151",
-    "net_mask": "255.255.255.0",
-    "gateway": "192.168.88.1",
+    "DHCP": 1,
+    "IP": " 192.168.88.131",
+    "net_mask": " 255.255.255.0",
+    "gateway": " 192.168.88.1",
     "DNS": "192.168.88.1",
     "mDNS_name": "playerttOk",
     "ip_adress": "192.168.88.151"
   },
   "time": {
     "NTP": 1,
-    "time_zone": "-4"
+    "time_zone": "3"
   },
   "security": {
     "admin_pass": "1234",
