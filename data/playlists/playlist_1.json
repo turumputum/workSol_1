@@ -2,52 +2,40 @@
   "playlist_name": "playlist_1",
   "version": "1.0",
   "volume": 70,
-  "next_topic":"button_module_1/button_4 : 1",
-  "prev_topic":"button_module_1/button_5 : 1",
-  "play_pause_topic":"",
-  "stop_topic":"",
-  "state_topic":"",
-  "volume_val_topic":"",
-  "volume_up_topic":"",
-  "volume_down_topic":"",
+  "next_topic": "button_module_1/button_4 : 1",
+  "prev_topic": "button_module_1/button_5 : 1",
+  "play_pause_topic": "",
+  "stop_topic": "",
+  "state_topic": "",
+  "volume_val_topic": "",
+  "volume_up_topic": "",
+  "volume_down_topic": "",
   "tracks": [
     {
       "order_num": 1,
-      "name": "video_1",
-      "path": "data/content/video_1.mp4",
-      "content_group": "video",
+      "name": "new_track",
+      "path": "data/content/monofonEng.mp3",
+      "content_group": "sound",
       "type": "simple",
       "error": "",
-      "loop": "off"
-    },{
+      "loop": false,
+      "triger_on": " : ",
+      "triger_off": " : ",
+      "pub_on_start": " : ",
+      "pub_on_end": " : "
+    },
+    {
       "order_num": 2,
-      "name": "video_2",
-      "path": "data/content/video_2.mp4",
-      "content_group": "video",
+      "name": "new_track",
+      "path": "data/content/monofonRus.mp3",
+      "content_group": "sound",
       "type": "simple",
       "error": "",
-      "loop": "off"
-    },{
-      "order_num": 3,
-      "name": "video_3",
-      "path": "data/content/video_3.mp4",
-      "content_group": "video",
-      "type": "simple",
-      "error": "",
-      "loop": "on"
-
-    },{
-      "order_num": 4,
-      "name": "interactive_video_4",
-      "path": "data/content/video_4.mp4",
-      "content_group": "video",
-      "type": "interactive",
-      "error": "",
-      "loop": "off",
-      "triger_on": "button_module_1/button_3 : 1",
-      "triger_off": "button_module_1/button_3 : 0",
-      "pub_on_start": "button_module_1/led_3 : 1",
-      "pub_on_end": "button_module_1/led_3 : 0"
+      "loop": false,
+      "triger_on": " : ",
+      "triger_off": " : ",
+      "pub_on_start": " : ",
+      "pub_on_end": " : "
     }
   ]
 }

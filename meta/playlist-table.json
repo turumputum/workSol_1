@@ -1,22 +1,17 @@
 [
   {
+    "path": "data/playlists/newPlaylist.json",
+    "name": "newPlaylist",
+    "type": "multimedia"
+  },
+  {
     "path": "data/playlists/playlist_1.json",
-    "name": "22dd2",
+    "name": "playlist_1",
     "type": "multimedia"
   },
   {
     "path": "data/playlists/playlist_2.json",
-    "name": "23ed5ds3s",
-    "type": "multimedia"
-  },
-  {
-    "path": "data/playlists/playlist_3.json",
-    "name": "dww",
-    "type": "multimedia"
-  },
-  {
-    "path": "data/playlists/utility_1.sh",
-    "name": "playlist_1",
+    "name": "playlist_2",
     "type": "multimedia"
   }
 ]

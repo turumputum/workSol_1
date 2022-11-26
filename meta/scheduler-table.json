@@ -1,26 +1,18 @@
 [
   {
+    "path": "data/playlists/newPlaylist.json",
+    "type": "multimedia",
+    "start_time": "02:39",
+    "end_time": "22:39",
+    "day_of_week": "1,2,3,6",
+    "name": "newPlaylist"
+  },
+  {
     "path": "data/playlists/playlist_1.json",
-    "start_time": "10:30",
-    "end_time": "12:00",
-    "day_of_week": "2,3,4,5,6,7",
-    "name": "22dd2",
-    "type": "multimedia"
-  },
-  {
-    "path": "data/playlists/utility_1.sh",
-    "start_time": "01:01",
-    "end_time": "02:34",
-    "day_of_week": "1,3,4",
-    "name": "utility_1",
-    "type": "utility "
-  },
-  {
-    "path": "data/playlists/playlist_2.json",
-    "start_time": "10:00",
-    "end_time": "11:00",
-    "day_of_week": "1,2,3,4,5,6,7",
-    "name": "23ed5ds3s",
-    "type": "multimedia"
+    "type": "multimedia",
+    "start_time": "02:43",
+    "end_time": "23:43",
+    "day_of_week": "1,2",
+    "name": "playlist_1"
   }
 ]

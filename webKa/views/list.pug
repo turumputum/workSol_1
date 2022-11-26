@@ -101,9 +101,9 @@ block content
                         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
                     .modal-body
                         input(type='hidden' name='hidenName' value='0')
-                        input#upload-file.form-control(type='file' name='file')
+                        input#upload_file.form-control(type='file' name='file')
                     .modal-footer.bg-light
-                        button#conf_btn.btn.btn-secondary(data-bs-dismiss="modal" type='reset' onclick = 'fetch_upload()') Confirm
+                        button#conf_btn.btn.btn-secondary( onclick = 'fetch_upload()') Confirm
                         button.btn.btn-secondary(type='reset' data-bs-dismiss='modal') Cancel
                         //button.btn.btn-primary(type='submit') Upload
 
@@ -177,9 +177,9 @@ block content
         //- })
 
         //-----------------------UPLOAD--------------------
-        $("#upload-file").on("change", (e, files) => {
+        $("#upload_file").on("change", (e, files) => {
             //$(".multi-files-value").val(JSON.stringify(files.map((f) => f.name)));
-            let input = $("#upload-file").val()
+            let input = $("#upload_file").val()
             console.log("upload file name lenght:" + input.length)
             if(input.length > 0){
                 $('#upload_btn').attr('disabled',  false)
@@ -194,19 +194,23 @@ block content
 
         function fetch_upload(){
             var upload_mw = document.getElementById('uploadModal')
-            var file_input_g = upload_mw.querySelector('#upload-file')
+            //var file_input_g = upload_mw.querySelector('#upload_file')
+            var file_input_g = document.getElementById('upload_file')
             //var form_up = document.getElementById("form[action='@upload']")
             var formData = new FormData()
             
-            console.log("ttt: " + $("#upload-file").val())
+            console.log("ttt: " + file_input_g.files[0].name)
 
             //$('#hidenName').val('1')
 
-            formData.append('file', file_input_g.files[0])
-            formData.append('fileName', file_input_g.files[0].name)
-            console.log("Upload file : " + file_input_g.files[0].name)
-
-
+            //formData.append('file', file_input_g.files[0], file_input_g.files[0].name)
+            formData.append('file',file_input_g.files[0])
+            //formData.append('fileName', 'govnishe')
+            //console.log("Upload file : " + file_input_g.files[0].name)
+            //console.log("Upload file : " + formData.fileName)
+            for (var p of formData) {
+                console.log(p);
+            }
 
             fetch('@upload', {
                 method: 'POST',
@@ -219,7 +223,7 @@ block content
                 body: formData
             }).then((res) => {
                 console.log("upload POST OK:", res)
-                window.location.reload();
+                //window.location.reload();
                 }).catch((err) => {
                 console.log(err)
                 })

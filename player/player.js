@@ -4,15 +4,47 @@ const fs = require("fs");
 const path = require("path");
 const mqtt = require("mqtt");
 const log_file = require('log-to-file');
+const process = require ('process');
+
 const { Console } = require('console');
 
 var playlist
 var current_track_index = 0
 var interrupted_track_index = 0
 var simple_track_num = 0
-var player_state = 'Playing'
+var player_state = 'Idle'
 var current_volume = 50
 var flag_mqtt_ok = 0
+
+
+process.stdin.resume();
+process.on('SIGTERM', () => {
+  stop_track(current_track_index)
+  console.log('Received SIGTERM. Exit.');
+  process.exit()
+});
+
+
+let mpvPlayer = new mpv({
+  //"binary":'C:/Users/Yac/mpv_dist/mpv.exe'
+}, [
+  "--fullscreen",
+]);
+
+setTimeout(()=>{
+  try {
+    var config = JSON.parse(fs.readFileSync('../meta/config.json'))
+  } catch (err) {
+    console.error(`Error read file: ${err}`)
+    log_file(`Error read file: ${err}`, '../logs/player_log.log')
+    process.exit(1);
+  }
+  mpvPlayer.volume(config.sound.volume);
+  console.log("config OK, lets play")
+  if (simple_track_num > 0) {
+    play_track(current_track_index);
+  }
+},1000)
 
 // const readline = require('readline');
 // readline.emitKeypressEvents(process.stdin);
@@ -59,37 +91,37 @@ client.on('connect', function () {
 
 
   //-------MQTT-------Subscribe playlist topics------------------
-  if (playlist.next_topic != '') {
+  if ((playlist.next_topic != '')&&(playlist.hasOwnProperty('next_topic'))) {
     if (mqtt_sub(playlist.next_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed next topic: ${playlist.next_topic}`)
     }
   }
-  if (playlist.prev_topic != '') {
+  if ((playlist.prev_topic != '')&&(playlist.hasOwnProperty('prev_topic'))) {
     if (mqtt_sub(playlist.prev_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed prev topic: ${playlist.prev_topic}`)
     }
   }
-  if (playlist.play_pause_topic != '') {
+  if ((playlist.play_pause_topic != '')&&(playlist.hasOwnProperty('play_pause_topic'))) {
     if (mqtt_sub(playlist.play_pause_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed play_pause topic: ${playlist.play_pause_topic}`)
     }
   }
-  if (playlist.stop_topic != '') {
+  if ((playlist.stop_topic != '')&&(playlist.hasOwnProperty('stop_topic'))) {
     if (mqtt_sub(playlist.stop_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed stop topic: ${playlist.stop_topic}`)
     }
   }
-  if (playlist.volume_up_topic != '') {
+  if ((playlist.volume_up_topic != '')&&(playlist.hasOwnProperty('volume_up_topic'))) {
     if (mqtt_sub(playlist.volume_up_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed volume_up topic: ${playlist.volume_up_topic}`)
     }
   }
-  if (playlist.volume_down_topic != '') {
+  if ((playlist.volume_down_topic != '')&&(playlist.hasOwnProperty('volume_down_topic'))) {
     if (mqtt_sub(playlist.volume_down_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed volume_down topic: ${playlist.volume_down_topic}`)
     }
   }
-  if (playlist.volume_val_topic != '') {
+  if ((playlist.volume_val_topic != '')&&(playlist.hasOwnProperty('volume_val_topic'))) {
     if (mqtt_sub(playlist.volume_val_topic.split(' ').slice(0, 1)) === true) {
       console.log(`Subscribed volume_val topic: ${playlist.volume_val_topic}`)
     }
@@ -134,6 +166,9 @@ client.on('connect', function () {
 
 
   flag_mqtt_ok = 1
+
+  
+
 })
 
 client.on('message', function (topic, message) {
@@ -163,6 +198,13 @@ client.on('message', function (topic, message) {
     current_volume = parseInt(message)
     //mpvPlayer.adjustVolume(current_volume)
     mpvPlayer.volume(current_volume)
+    try{
+      var config = JSON.parse(fs.readFileSync('../meta/config.json'))
+      config.sound.volume = current_volume
+      fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
+    }catch(err){
+      console.log(`set config fail: ${err}`)
+    }
     console.log(`Mqtt command, set volume: ${current_volume}`)
   }
   if (topic == playlist.volume_up_topic.split(/[: ]/).slice(0, 1)) {
@@ -352,17 +394,10 @@ function shift_simple_track(dir) {
 
 
 
-let mpvPlayer = new mpv({
-  "binary":'C:/Users/Yac/mpv_dist/mpv.exe'
-}, [
-  "--fullscreen",
-]);
-mpvPlayer.volume(current_volume);
 
-console.log("config OK, lets play")
-if (simple_track_num > 0) {
-  play_track(current_track_index);
-}
+
+
+  
 
 
 // //mpvPlayer.fullscreen();
@@ -373,12 +408,19 @@ if (simple_track_num > 0) {
 mpvPlayer.on('stopped', function () {
   if (flag_mqtt_ok == 1) {
     if (playlist.tracks[current_track_index].pub_on_end != '' && playlist.tracks[current_track_index].type == 'interactive') {
-      client.publish(playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(0, 1), playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(-1), { retain: true })
+      console.log(`end action interactive track: ${playlist.tracks[current_track_index].pub_on_end}`)
+      try {
+        let tmpTopic = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(0, 1)
+        let tmpPayload = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(-1)
+        client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
+      } catch (err) {
+        console.log('publish error' + err)
+      }
     }
   }
 
   if (simple_track_num > 0 && player_state != "Idle") {
-    if (playlist.tracks[current_track_index].loop == 'on') {//----------Loop current track----------------------
+    if ((playlist.tracks[current_track_index].loop == 'on')&&(playlist.tracks[current_track_index].type!='simple')) {//----------Loop current track----------------------
       if (play_track(current_track_index)) {
         console.log(`Prev track End, loop current track OK, index: ${current_track_index}`)
       }

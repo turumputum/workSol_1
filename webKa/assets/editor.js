@@ -20,7 +20,15 @@ var content_table
 function newPlaylist(){
     let playlist = {
         playlist_name: $('#newPlaylist_name_input').val(),
-        version: 1.0,
+        version: "1.0",
+        next_topic:"",
+        prev_topic:"",
+        play_pause_topic:"",
+        stop_topic:"",
+        state_topic:"",
+        volume_val_topic:"",
+        volume_up_topic:"",
+        volume_down_topic:"",
         tracks:[]
     }
     current_playlist_path='data/playlists/'+playlist.playlist_name+'.json'

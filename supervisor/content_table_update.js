@@ -5,9 +5,9 @@ const fs = require("fs");
 const path = require('path');
 
 var content_list = {
-    "images": [],
-    "videos": [],
-    "sounds": []
+    "image": [],
+    "video": [],
+    "sound": []
 }
 
 function* walkSync(dir) {
@@ -32,7 +32,7 @@ try {
                 "name": filePath.split('/').slice(-1)[0]
             }
             pic_file.name = pic_file.name.split('.').slice(-2, -1)[0]
-            content_list.images.push(pic_file)
+            content_list.image.push(pic_file)
         }
 
         if (file_tools.check_type(filePath) == 'video') {
@@ -41,7 +41,7 @@ try {
                 "name": filePath.split('/').slice(-1)[0]
             }
             vid_file.name = vid_file.name.split('.').slice(-2, -1)[0]
-            content_list.videos.push(vid_file)
+            content_list.video.push(vid_file)
         }
 
 
@@ -51,7 +51,7 @@ try {
                 "name": filePath.split('/').slice(-1)[0]
             }
             sound_file.name = sound_file.name.split('.').slice(-2, -1)[0]
-            content_list.sounds.push(sound_file)
+            content_list.sound.push(sound_file)
         }
     }
 

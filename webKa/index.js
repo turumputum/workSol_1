@@ -8,7 +8,8 @@ const helperFuncs = require('./assets/helperFuncs');
 
 const express = require("express");
 const session = require("express-session");
-const busboy = require("connect-busboy");
+const Busboy = require("connect-busboy");
+const fileUpload = require('express-fileupload');
 const flash = require("connect-flash");
 //const querystring = require("querystring");
 //const assets = require("./assets");
@@ -97,7 +98,8 @@ app.use(
   })
 );
 app.use(flash());
-app.use('../data/*@upload',busboy());
+//app.use('../data/*@upload',busboy());
+app.use(fileUpload());
 app.use(
   bodyParser.urlencoded({
     extended: false,
@@ -227,88 +229,111 @@ app.post("/data/*@move", (req, res) => {
     });
 });
 
-app.post("/data/*@upload", (req, res) => {
-  res.filename = req.url.replace("@upload",'')
+// app.post("/data/*@upload", (req, res) => {
+//   res.filename = req.url.replace("@upload",'')
 
-  const up_data = Object.keys(req.body)[0]
-  console.log("upload data body: " + up_data)
-  console.log("upload data file name: " + res.filename)
+//   const up_data = Object.keys(req.body)[0]
+//   console.log("upload data body: " + up_data)
+//   console.log("upload data file name: " + res.filename)
 
-  //req.busboy = new Busboy({ headers: req.headers });
+//   req.busboy = new Busboy({ headers: req.headers });
 
-  let buff = null;
-  let new_fileName = null;
-  req.busboy.on("file", (key, stream, filename) => {
-    //console.log("busboy starting fo name: " + JSON.stringify(filename))
-    //new_fileName = filename.filename.toString('utf8')
-    if (key == "file") {
-      let buffs = [];
-      stream.on("data", (d) => {
-        buffs.push(d);
-      });
-      stream.on("end", () => {
-        buff = Buffer.concat(buffs);
-        buffs = null;
-      });
-    }
+//   let buff = null;
+//   let new_fileName = null;
+//   req.busboy.on("file", (key, stream, filename) => {
+//     //console.log("busboy starting fo name: " + JSON.stringify(filename))
+//     //new_fileName = filename.filename.toString('utf8')
+//     if (key == "file") {
+//       let buffs = [];
+//       stream.on("data", (d) => {
+//         buffs.push(d);
+//       });
+//       stream.on("end", () => {
+//         buff = Buffer.concat(buffs);
+//         buffs = null;
+//       });
+//     }
+//   });
+//   req.busboy.on("field", (key, value) => {
+//     if (key == "file") {
+//       console.log("field filename: " + value)
+//       //saveas = value;
+//     } else if (key == "fileName"){
+//       console.log("field myinput: " + value)
+//       new_fileName = value
+//     }
+//   });
+//   req.busboy.on("finish", () => {
+//     if (!buff || !new_fileName) {
+//       return res.status(400).end();
+//     }
+//     let fileExists = new Promise((resolve, reject) => {
+//       // check if file exists
+//       fs.stat(relative(res.filename, new_fileName), (err, stats) => {
+//         if (err) {
+//           return reject(err);
+//         }
+//         return resolve(stats);
+//       });
+//     });
+
+//     fileExists
+//       .then((stats) => {
+//         console.warn("file exists, cannot overwrite");
+//         req.flash("error", "File exists, cannot overwrite. ");
+//         res.redirect("back");
+//       })
+//       .catch((err) => {
+//         const new_path = relative(res.filename, new_fileName);
+//         console.log("saving file to " + new_path);
+//         let save = fs.createWriteStream(new_path);
+//         save.on("close", () => {
+//           if (res.headersSent) {
+//             return;
+//           }
+//           if (buff.length === 0) {
+//             console.log("File saved. Warning: empty file.")
+//             req.flash("success", "File saved. Warning: empty file.");
+//           } else {
+//             buff = null;
+//             console.log("File saved")
+//             req.flash("success", "File saved. ");
+//           }
+//           res.redirect("back");
+//         });
+//         save.on("error", (err) => {
+//           console.warn(err);
+//           req.flash("error", err.toString());
+//           res.redirect("back");
+//         });
+//         save.write(buff);
+//         save.end();
+//       });
+//   });
+//   req.pipe(req.busboy);
+// });
+
+app.post('/data/*@upload', function(req, res) {
+  let file_path = req.url.replace("@upload",'')
+
+  let sampleFile;
+  let uploadPath;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+  sampleFile = req.files.sampleFile;
+  uploadPath = file_path + sampleFile.name;
+
+  // Use the mv() method to place the file somewhere on your server
+  sampleFile.mv(uploadPath, function(err) {
+    if (err)
+      return res.status(500).send(err);
+
+    res.send('File uploaded!');
   });
-  req.busboy.on("field", (key, value) => {
-    if (key == "file") {
-      console.log("field filename: " + value)
-      //saveas = value;
-    } else if (key == "fileName"){
-      console.log("field myinput: " + value)
-      new_fileName = value
-    }
-  });
-  req.busboy.on("finish", () => {
-    if (!buff || !new_fileName) {
-      return res.status(400).end();
-    }
-    let fileExists = new Promise((resolve, reject) => {
-      // check if file exists
-      fs.stat(relative(res.filename, new_fileName), (err, stats) => {
-        if (err) {
-          return reject(err);
-        }
-        return resolve(stats);
-      });
-    });
-
-    fileExists
-      .then((stats) => {
-        console.warn("file exists, cannot overwrite");
-        req.flash("error", "File exists, cannot overwrite. ");
-        res.redirect("back");
-      })
-      .catch((err) => {
-        const new_path = relative(res.filename, new_fileName);
-        console.log("saving file to " + new_path);
-        let save = fs.createWriteStream(new_path);
-        save.on("close", () => {
-          if (res.headersSent) {
-            return;
-          }
-          if (buff.length === 0) {
-            console.log("File saved. Warning: empty file.")
-            req.flash("success", "File saved. Warning: empty file.");
-          } else {
-            buff = null;
-            console.log("File saved")
-            req.flash("success", "File saved. ");
-          }
-          res.redirect("back");
-        });
-        save.on("error", (err) => {
-          console.warn(err);
-          req.flash("error", err.toString());
-          res.redirect("back");
-        });
-        save.write(buff);
-        save.end();
-      });
-  });
-  req.pipe(req.busboy);
 });
 
 app.post("/data/*@mkdir", (req, res) => {
