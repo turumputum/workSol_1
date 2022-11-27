@@ -849,8 +849,15 @@ app.post("/delete_playlist*",(req, res) => {
 
   const path ='../'+playlist_table[inData.index_to_delete-1].path
 
+  let scheduler_table = JSON.parse(fs.readFileSync('../meta/scheduler-table.json'))
+  //console.log(`before------------------- \n${JSON.stringify(scheduler_table,null,2)}`);
+  scheduler_table = scheduler_table.filter(task => task.path!=playlist_table[inData.index_to_delete-1].path)
+  //console.log(`after------------------- \n${JSON.stringify(scheduler_table,null,2)}`);
+  fs.writeFileSync(('../meta/scheduler-table.json'), JSON.stringify(scheduler_table,null,2))
+
   playlist_table.splice(inData.index_to_delete-1,1) 
   fs.writeFileSync(('../meta/playlist-table.json'), JSON.stringify(playlist_table,null,2))
+
   
   
   console.log("Delete PLAYLIST: "+ JSON.stringify(inData,null,2)+" path: "+path)
