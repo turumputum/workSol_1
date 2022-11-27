@@ -791,7 +791,7 @@ app.get("/get_playlist*",(req, res) => {
 app.post("/save_playlist*",(req, res) => {
   //const playlist = JSON.parse(Object.keys(req.body)[0])
   const inData = JSON.parse(Object.keys(req.body)[0])
-  
+  var path ='../'+ inData.path 
   const playlist = inData.playlist
   // const path = req.url.split('?').slice(-1)[0]
   let scheduler_table = JSON.parse(fs.readFileSync('../meta/scheduler-table.json'))
@@ -805,32 +805,27 @@ app.post("/save_playlist*",(req, res) => {
       type: 'multimedia'
     })
     playlistIndex = playlist_table.length-1
-  }
+  }else{
 
-    var path ='../'+ inData.path
-  if(inData.path.split('/').slice(-1)!=playlist.playlist_name){
-    fs.unlink(path,(err => {
-      if (err) console.log(err);
-    }))
-
-    playlist_table[playlistIndex].path = 'data/playlists/'+playlist.playlist_name+".json"
-
-    let task_indices = scheduler_table.findIndex(s=>s.path==playlist_table[playlistIndex].name)
-    if(task_indices!=''){
-      console.log(`Finde index: ${task_indices}`)
-      for(let i of task_indices){
-        console.log(`change path in task: ${i}`)
-        scheduler_table[i].path = playlist_table[playlistIndex].path
+    if(inData.path.split('/').slice(-1)!=playlist.playlist_name){
+      if (fs.existsSync(path)) {
+        fs.unlink(path,(err => {
+          if (err) console.log(err);
+        }))
       }
+
+      const new_path =  'data/playlists/'+playlist.playlist_name+".json"
+      scheduler_table.forEach(item =>{
+        if(item.path==playlist_table[playlistIndex].path){
+          item.path = new_path
+          }
+      })
+
+      playlist_table[playlistIndex].path = new_path
+      playlist_table[playlistIndex].name = playlist.playlist_name
+      path = '../'+playlist_table[playlistIndex].path
+      console.log(`rename playlist name OK`)
     }
-
-    
-    playlist_table[playlistIndex].name = playlist.playlist_name
-    path = '../'+playlist_table[playlistIndex].path
-    console.log(`rename playlist name OK`)
-
-    
-    
   }
 
   fs.writeFileSync(('../meta/scheduler-table.json'), JSON.stringify(scheduler_table,null,2))
@@ -860,12 +855,14 @@ app.post("/delete_playlist*",(req, res) => {
   
   console.log("Delete PLAYLIST: "+ JSON.stringify(inData,null,2)+" path: "+path)
   //fs.writeFileSync((path), JSON.stringify(playlist,null,2))
-  fs.unlink(path, (err => {
-    if (err) console.log(err);
-    else {
-      console.log("Deleted OK");
-    }
-  }))
+  if (fs.existsSync(path)) {
+    fs.unlink(path, (err => {
+      if (err) console.log(err);
+      else {
+        console.log("Deleted OK");
+      }
+    }))
+  }
 
   return res.end('done')
 });

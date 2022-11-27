@@ -1,7 +1,12 @@
 [
   {
-    "path": "data/playlists/weee333.json",
-    "name": "weee333",
+    "name": "2222",
+    "path": "data/playlists/2222.json",
+    "type": "multimedia"
+  },
+  {
+    "name": "54321",
+    "path": "data/playlists/54321.json",
     "type": "multimedia"
   }
 ]

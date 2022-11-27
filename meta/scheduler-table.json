@@ -1,6 +1,13 @@
 [
   {
-    "path": "data/playlists/1111.json",
+    "path": "data/playlists/2222.json",
+    "type": "text",
+    "start_time": "",
+    "end_time": "",
+    "day_of_week": ""
+  },
+  {
+    "path": "data/playlists/54321.json",
     "type": "text",
     "start_time": "",
     "end_time": "",
