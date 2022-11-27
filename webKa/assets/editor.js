@@ -102,6 +102,11 @@ function cancel_edit_playlist(){
     $('#editPlaylistModal').modal('hide')
 }
 
+$('#playlist_name_input').on("change", function(){
+    console.log("playlist name is changed")
+    current_playlist.playlist_name = $('#playlist_name_input').val()
+})
+
 $('#editPlaylistModal').on('shown.bs.modal', function(){
     update_playlist_modal()
 })

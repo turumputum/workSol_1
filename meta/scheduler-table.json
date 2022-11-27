@@ -3,8 +3,8 @@
     "path": "data/playlists/newPlaylist.json",
     "type": "multimedia",
     "start_time": "02:39",
-    "end_time": "22:39",
-    "day_of_week": "1,2,3,6",
+    "end_time": "19:39",
+    "day_of_week": "1,2,3,6,7",
     "name": "newPlaylist"
   },
   {

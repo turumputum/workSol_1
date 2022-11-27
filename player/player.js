@@ -13,13 +13,14 @@ var current_track_index = 0
 var interrupted_track_index = 0
 var simple_track_num = 0
 var player_state = 'Idle'
-var current_volume = 50
+var current_volume 
 var flag_mqtt_ok = 0
 
 
 process.stdin.resume();
 process.on('SIGTERM', () => {
   stop_track(current_track_index)
+
   console.log('Received SIGTERM. Exit.');
   process.exit()
 });
@@ -39,7 +40,8 @@ setTimeout(()=>{
     log_file(`Error read file: ${err}`, '../logs/player_log.log')
     process.exit(1);
   }
-  mpvPlayer.volume(config.sound.volume);
+  //set_volume(config.sound.volume)
+  client.publish('player/volume_val', `${config.sound.volume}`, { retain: true })
   console.log("config OK, lets play")
   if (simple_track_num > 0) {
     play_track(current_track_index);
@@ -73,8 +75,6 @@ function read_playlist(path) {
       simple_track_num += 1
     }
   })
-
-  current_volume = playlist.volume
 }
 
 //--------------------Read playlist first----------------------
@@ -196,15 +196,7 @@ client.on('message', function (topic, message) {
   }
   if (topic == playlist.volume_val_topic.split(/[: ]/).slice(0, 1)) {
     current_volume = parseInt(message)
-    //mpvPlayer.adjustVolume(current_volume)
-    mpvPlayer.volume(current_volume)
-    try{
-      var config = JSON.parse(fs.readFileSync('../meta/config.json'))
-      config.sound.volume = current_volume
-      fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
-    }catch(err){
-      console.log(`set config fail: ${err}`)
-    }
+    set_volume(current_volume)
     console.log(`Mqtt command, set volume: ${current_volume}`)
   }
   if (topic == playlist.volume_up_topic.split(/[: ]/).slice(0, 1)) {
@@ -241,7 +233,7 @@ client.on('message', function (topic, message) {
   }
   if (topic == 'player/volume_val') {
     current_volume = parseInt(message)
-    mpvPlayer.volume(current_volume)
+    set_volume(current_volume)
     console.log(`Mqtt command, set volume: ${current_volume}`)
   }
 
@@ -252,7 +244,7 @@ client.on('message', function (topic, message) {
         //stop_track(current_track_index)
         if (play_track(index)) {
           interrupted_track_index = current_track_index
-          current_track_index = index
+          //current_track_index = index
           console.log(`mqtt trigger_on Track OK, index: ${index}`)
         }
       }
@@ -261,7 +253,7 @@ client.on('message', function (topic, message) {
         //stop_track(current_track_index)
         if (simple_track_num > 0) {
           if (play_track(interrupted_track_index)) {
-            current_track_index = interrupted_track_index
+            //current_track_index = interrupted_track_index
             console.log(`mqtt trigger_off return to interrupted Track OK, index: ${current_track_index}`)
           }
         }
@@ -310,6 +302,19 @@ function report_state(state) {
 
 //-----------------Player--------------------
 
+function set_volume(volume){
+  current_volume = volume
+  mpvPlayer.volume(volume)
+  
+  try{
+    var config = JSON.parse(fs.readFileSync('../meta/config.json'))
+    config.sound.volume = volume
+    fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
+  }catch(err){
+    console.log(`set config fail: ${err}`)
+  }
+}
+
 function play_track(index) {
   stop_track(current_track_index)
   try {
@@ -323,6 +328,7 @@ function play_track(index) {
   }
   if (flag_mqtt_ok == 1) {
     if ((playlist.tracks[index].pub_on_start != '') && (playlist.tracks[index].type == 'interactive')) {
+      console.log(`start action interactive track: ${playlist.tracks[current_track_index].pub_on_start}`)
       try {
         let tmpTopic = playlist.tracks[index].pub_on_start.split(/[: ]/).slice(0, 1)
         let tmpPayload = playlist.tracks[index].pub_on_start.split(/[: ]/).slice(-1)
@@ -332,8 +338,10 @@ function play_track(index) {
       }
     }
   }
-
-  report_state(player_state = 'Playing')
+  current_track_index = index
+  setTimeout(()=>{
+    report_state(player_state = 'Playing')
+  },100)
   return true
 }
 
@@ -346,8 +354,15 @@ function stop_track(index) {
     return false
   }
   if (flag_mqtt_ok == 1) {
-    if (playlist.tracks[index].pub_on_end != '' && playlist.tracks[index].type == 'interactive') {
-      client.publish(playlist.tracks[index].pub_on_end.split(/[: ]/).slice(0, 1)[0], playlist.tracks[index].pub_on_end.split(/[: ]/).slice(-1)[0], { retain: true })
+    if (playlist.tracks[current_track_index].pub_on_end != '' && playlist.tracks[current_track_index].type == 'interactive') {
+      console.log(`end action interactive track: ${playlist.tracks[current_track_index].pub_on_end}`)
+      try {
+        let tmpTopic = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(0, 1)
+        let tmpPayload = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(-1)
+        client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
+      } catch (err) {
+        console.log('publish error' + err)
+      }
     }
   }
   report_state(player_state = 'Idle')
@@ -393,31 +408,24 @@ function shift_simple_track(dir) {
 }
 
 
-
-
-
-
-  
-
-
 // //mpvPlayer.fullscreen();
 
 
 
 
 mpvPlayer.on('stopped', function () {
-  if (flag_mqtt_ok == 1) {
-    if (playlist.tracks[current_track_index].pub_on_end != '' && playlist.tracks[current_track_index].type == 'interactive') {
-      console.log(`end action interactive track: ${playlist.tracks[current_track_index].pub_on_end}`)
-      try {
-        let tmpTopic = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(0, 1)
-        let tmpPayload = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(-1)
-        client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
-      } catch (err) {
-        console.log('publish error' + err)
-      }
-    }
-  }
+  // if (flag_mqtt_ok == 1) {
+  //   if (playlist.tracks[current_track_index].pub_on_end != '' && playlist.tracks[current_track_index].type == 'interactive') {
+  //     console.log(`end action interactive track: ${playlist.tracks[current_track_index].pub_on_end}`)
+  //     try {
+  //       let tmpTopic = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(0, 1)
+  //       let tmpPayload = playlist.tracks[current_track_index].pub_on_end.split(/[: ]/).slice(-1)
+  //       client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
+  //     } catch (err) {
+  //       console.log('publish error' + err)
+  //     }
+  //   }
+  // }
 
   if (simple_track_num > 0 && player_state != "Idle") {
     if ((playlist.tracks[current_track_index].loop == 'on')&&(playlist.tracks[current_track_index].type!='simple')) {//----------Loop current track----------------------

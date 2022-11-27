@@ -1,5 +1,5 @@
 {
-  "playlist_name": "newPlaylist",
+  "playlist_name": "newPlaylistffff",
   "version": "1.0",
   "next_topic": "",
   "prev_topic": "",
@@ -12,16 +12,29 @@
   "tracks": [
     {
       "order_num": 1,
-      "name": "new_track",
-      "path": "data/content/monofonEng.mp3",
+      "name": "track_1",
+      "path": "data/content/track_1.mp3",
       "content_group": "sound",
       "type": "interactive",
       "error": "",
       "loop": false,
-      "triger_on": "button_module_1/button_1 : 1",
-      "triger_off": " : ",
-      "pub_on_start": "button_module_1/led_1 : 1",
-      "pub_on_end": "button_module_1/led_1 : 0"
+      "triger_on": "button_module_1/button_1    :    1",
+      "triger_off": "    :    ",
+      "pub_on_start": "button_module_1/led_1    :    1",
+      "pub_on_end": "button_module_1/led_1    :    0"
+    },
+    {
+      "order_num": 2,
+      "name": "track_2",
+      "path": "data/content/track_2.mp3",
+      "content_group": "sound",
+      "type": "interactive",
+      "error": "",
+      "loop": false,
+      "triger_on": "button_module_1/button_2  :  1",
+      "triger_off": "  :  ",
+      "pub_on_start": "button_module_1/led_2  :  1",
+      "pub_on_end": "button_module_1/led_2   :  0"
     }
   ]
 }

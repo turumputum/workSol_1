@@ -43,6 +43,7 @@ client.on('message', function (topic, message) {
       }
     }
     if(topic=='player/volume_val'){
+      console.log("mqtt set volume val")
       $('#volumeRange').val(parseInt(message))
     }
     if(topic=='scheduler/current_playlist'){
@@ -79,7 +80,10 @@ $('#bt_next').on('click', function(){
   //console.log('pressed next button')
   client.publish('player/next', '1')
 })
-
+$('#bt_restart').on('click', function(){
+  //console.log('pressed next button')
+  client.publish('scheduler/restart', '1')
+})
 
 $( document ).ready(function() {
     //console.log( "ready!" );

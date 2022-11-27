@@ -70,7 +70,7 @@ function check_state() {
     if (current_day == 0) {//-------------
         current_day = 7
     }
-    console.log(`Current day: '${current_day}' `)
+    //console.log(`Current day: '${current_day}' `)
 
     let flag_valid_playlist = 0
     //console.error(`scheduler-table read ok : ${JSON.stringify(scheduler_table, null, 2)}`)
@@ -81,22 +81,22 @@ function check_state() {
             let playlist_start_time_in_minutes = parseInt(task.start_time.split(':')[0]) * 60 + parseInt(task.start_time.split(':')[1])
             if (playlist_start_time_in_minutes <= current_time_in_minutes) {
                 let playlist_end_time_in_minutes = parseInt(task.end_time.split(':')[0]) * 60 + parseInt(task.end_time.split(':')[1])
-                console.log(`current_time_in_minutes: ${current_time_in_minutes} \n playlist_start_time_in_minutes: ${playlist_start_time_in_minutes} \n playlist_end_time_in_minutes: ${playlist_end_time_in_minutes}`)
+                //console.log(`current_time_in_minutes: ${current_time_in_minutes} \n playlist_start_time_in_minutes: ${playlist_start_time_in_minutes} \n playlist_end_time_in_minutes: ${playlist_end_time_in_minutes}`)
                 if (playlist_end_time_in_minutes > current_time_in_minutes) {
                     if ((state.current_playlist_path != task.path) && (task.type == 'multimedia')) {
                         //----- it's playlist ok ----
                         if (state.player_state == 'stop') {
                             start_player(task.path)
                             client.publish('scheduler/on_off_time', `${task.start_time}/${task.end_time}`, { retain: true })
-                            console.log(`lets play playlist ${state.current_playlist_name} from idle state`)
+                            //console.log(`lets play playlist ${state.current_playlist_name} from idle state`)
                         } else if (state.player_state == "play") {
                             stop_player()
                             start_player(playlist.path)
-                            console.log(`lets play playlist ${state.current_playlist_name} overlay previus playlist`)
+                            //console.log(`lets play playlist ${state.current_playlist_name} overlay previus playlist`)
                         }
                     }
                     flag_valid_playlist = 1
-                    console.log(`valid playlist is ${state.current_playlist_name} playing....`)
+                    //console.log(`valid playlist is ${state.current_playlist_name} playing....`)
                     break //playlist is valid, no time to turn off
                 }
             }
@@ -123,10 +123,52 @@ table_watcher.on('change', function (evt, name) {
     }
 })
 
+let playlist_watcher = watch('../data/playlists', { recursive: false });
+playlist_watcher.on('change', function (evt, name) {
+    try {
+        console.log('Reset playlist on playlist update')
+        stop_player()
+        check_state()
+    } catch (err) {
+        console.error(`: ${err}`)
+        process.exit(1);
+    }
+})
+
+
+function mqtt_sub(topic) {
+    if (client.subscribe(topic, function (err) {
+      if (err) {
+        console.error(`subscribe to: ${topic} filed: ${err}`)
+        log_file(`subscribe to: ${topic} filed: ${err}`, '../logs/player_log.log')
+        return err
+      } else {
+        console.log(`subscribe OK to: ${topic}`)
+        return true
+      }
+    })) {
+      return true
+    }
+  }
+
 
 const client = mqtt.connect('mqtt://127.0.0.1:1883')
 client.on('connect', function () {
     console.log("mqtt brocker connected!");
+
+    mqtt_sub('scheduler/restart')
+})
+
+client.on('message', function (topic, message) {
+
+    //--------MQTT------Action on playlist topics------------------
+    console.log('Incoming message')
+    
+    if ((topic =='scheduler/restart')&&(message =='1')){
+        console.log('Reset playlist on MQTT command')
+        stop_player()
+        check_state()
+    }
 })
 
 try {
