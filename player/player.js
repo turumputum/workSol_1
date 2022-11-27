@@ -414,6 +414,10 @@ function shift_simple_track(dir) {
 
 
 mpvPlayer.on('stopped', function () {
+  if(player_state!='Idle'){
+    stop_track(current_track_index)
+  }
+
   // if (flag_mqtt_ok == 1) {
   //   if (playlist.tracks[current_track_index].pub_on_end != '' && playlist.tracks[current_track_index].type == 'interactive') {
   //     console.log(`end action interactive track: ${playlist.tracks[current_track_index].pub_on_end}`)
