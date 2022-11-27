@@ -904,7 +904,7 @@ app.post("/save_playlist*",(req, res) => {
 
   fs.writeFileSync(('../meta/playlist-table.json'), JSON.stringify(playlist_table,null,2))
   
-  //console.log("Save PLAYLIST: "+ JSON.stringify(inData,null,2)+" path: "+path)
+  //console.log("Save PLAYLIST:"+ JSON.stringify(inData,null,2)+" path: "+path)
   fs.writeFileSync((path), JSON.stringify(playlist,null,2))
 
   return res.end('done')
