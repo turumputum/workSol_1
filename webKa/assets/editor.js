@@ -159,8 +159,8 @@ async function fetch_post_playlist(path, playlist) {
         },
         body: JSON.stringify(outData)
     }).then((res) => {
-        console.log("New task POST OK, res: ", res)
-        //window.location.reload();
+        console.log("Playlist POST OK, res: ", res)
+        window.location.reload();
         }).catch((err) => {
         console.log(err)
     })

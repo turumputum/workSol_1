@@ -889,23 +889,22 @@ app.post("/save_playlist*",(req, res) => {
     playlistIndex = playlist_table.length-1
   }
 
-  const path ='../'+ inData.path
-  if(inData.path.split('/').sliece(-1)!=playlist.name){
-    try{
-      fs.unlink(inData.path)
-      
-      playlist_table[playlistIndex].name = playlist.name
-      playlist_table[playlistIndex].path = inData.path.split('/').sliece(0,-1)+playlist.name
+  var path ='../'+ inData.path
+  if(inData.path.split('/').slice(-1)!=playlist.playlist_name){
+    fs.unlink(path,(err => {
+      if (err) console.log(err);
+    }))
+    
+    playlist_table[playlistIndex].name = playlist.playlist_name
+    playlist_table[playlistIndex].path = 'data/playlists/'+playlist.playlist_name+".json"
+    path = '../'+playlist_table[playlistIndex].path
+    console.log(`rename playlist name OK`)
 
-      console.log(`rename playlist name OK`)
-    }catch(err){
-      console.log(`rename playlist name FAIL: ${err}`)
-    }
   }
 
   fs.writeFileSync(('../meta/playlist-table.json'), JSON.stringify(playlist_table,null,2))
   
-  console.log("Save PLAYLIST: "+ JSON.stringify(inData,null,2)+" path: "+path)
+  //console.log("Save PLAYLIST: "+ JSON.stringify(inData,null,2)+" path: "+path)
   fs.writeFileSync((path), JSON.stringify(playlist,null,2))
 
   return res.end('done')
