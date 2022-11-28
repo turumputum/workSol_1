@@ -108,13 +108,13 @@ async function chek_dev_list() {
   //console.log(ports)
 }
 
-try {
-  var config = JSON.parse(fs.readFileSync('../meta/config.json'))
-} catch (err) {
-  console.error(`Error read file: ${err}`)
-  log_file(`Error read file: ${err}`, '../logs/uart2mqtt_log.txt')
-  process.exit(1);
-}
+// try {
+//   var config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
+// } catch (err) {
+//   console.error(`Error read file: ${err}`)
+//   log_file(`Error read file: ${err}`, '../logs/uart2mqtt_log.txt')
+//   process.exit(1);
+// }
 
 const client = mqtt.connect('mqtt://127.0.0.1:1883')
 client.on('connect', function () {

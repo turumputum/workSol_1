@@ -81,7 +81,7 @@ app.set('view engine', 'pug')
 
 //----------------CONFIG------------------------------
 function readConfigAndStatus(){
-  let rawdata = fs.readFileSync('../meta/config.json');
+  let rawdata = fs.readFileSync('../meta/player_config.json');
   configAndStatus = JSON.parse(rawdata);
   console.log("configAndStatus read ok");
 }
@@ -582,7 +582,7 @@ function isimage(f) {
 app.get("/", (req, res) => {
   //console.log('curent page is:' + configAndStatus.net.DHCP);
   //console.log('status error'+res.stats.error)
-  let config = JSON.parse(fs.readFileSync('../meta/config.json'))
+  let config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
   res.render("home",{
     pageName: "home",
     config: config
@@ -878,7 +878,7 @@ app.post("/delete_playlist*",(req, res) => {
 
 //----------------SETTINGS------------------------------
 app.get("/Settings", (req, res) => {
-  let config = JSON.parse(fs.readFileSync('../meta/config.json'))
+  let config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
 
   //
   res.render("settings",{
@@ -892,7 +892,7 @@ app.post("/save_config",(req, res) => {
   const inData = JSON.parse(Object.keys(req.body)[0])
 
   try{
-    fs.writeFileSync('../meta/config.json', JSON.stringify(inData,null,2))
+    fs.writeFileSync('../meta/player_config.json', JSON.stringify(inData,null,2))
     console.log(`Config save OK`)
   }catch(err){
     console.warn(`Write config error: ${err}`)
@@ -935,9 +935,9 @@ app.post("/set_time",(req, res) => {
   })
 
   try{
-    let config = JSON.parse(fs.readFileSync('../meta/config.json'))
+    let config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
     config.time.NTP = '0'
-    fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
+    fs.writeFileSync('../meta/player_config.json', JSON.stringify(config,null,2))
   }catch(err){
     console.warn(`Write ntp config error: ${err}`)
   }
@@ -957,45 +957,32 @@ function execPromise(cmd) {
  }
 
 app.get("/get_system_status",(req, res) => {
-  var osu = require('node-os-utils')
-  var cpu = osu.cpu
-  var drive = osu.drive
-  var mem = osu.mem
-  let status
-  Promise.all([
-    cpu.usage(),
-    drive.info(),
-    mem.info(),
-    execPromise(`cat /etc/armbianmonitor/datasources/soctemp`)
-  ]).then(responses =>{
-    //console.log(JSON.stringify(responses, null,2))
+  try{
+    var osu = require('node-os-utils')
+    var cpu = osu.cpu
+    var drive = osu.drive
+    var mem = osu.mem
+    let status
+    Promise.all([
+      cpu.usage(),
+      drive.info(),
+      mem.info(),
+      execPromise(`cat /etc/armbianmonitor/datasources/soctemp`)
+    ]).then(responses =>{
+      //console.log(JSON.stringify(responses, null,2))
 
-    status={
-      cpu_load: responses[0],
-      ram_usage: `${parseFloat(responses[2].usedMemMb/1000).toFixed(1)}/${parseFloat(responses[2].totalMemMb/1000).toFixed(1)}`,
-      hdd_usage: `${responses[1].usedGb}/${responses[1].totalGb}`,
-      soc_temp: Math.round(parseInt(responses[3])/1000)
-    }
+      status={
+        cpu_load: responses[0],
+        ram_usage: `${parseFloat(responses[2].usedMemMb/1000).toFixed(1)}/${parseFloat(responses[2].totalMemMb/1000).toFixed(1)}`,
+        hdd_usage: `${responses[1].usedGb}/${responses[1].totalGb}`,
+        soc_temp: Math.round(parseInt(responses[3])/1000)
+      }
 
-    res.send({
-      status:status
+      res.send({
+        status:status
+      })
     })
-  })
-  
-  
-  
-  // execPromise(`cat /etc/armbianmonitor/datasources/soctemp`)
-  // .then((res) => {
-  //   status.cpu_temp = Math.round(parseInt(res)/1000)
-  //   console.log(`Get temp resault ${status.cpu_temp}`)
-
-    
-  // }).then(()=>{
-    
-  // })
-  // status.cpu_temp = parseInt(stdout)/1000
-  // console.log(`Get temp resault ${status.cpu_temp}`) 
-
+  }catch{}  
   
 });
 

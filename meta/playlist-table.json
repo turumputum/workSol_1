@@ -1,10 +1,5 @@
 [
   {
-    "path": "data/playlists/1232.json",
-    "name": "1232",
-    "type": "multimedia"
-  },
-  {
     "path": "data/playlists/interactive_playlist.json",
     "name": "interactive_playlist",
     "type": "multimedia"

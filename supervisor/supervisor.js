@@ -23,7 +23,7 @@ let usb_watcher = watch('/dev');
 function set_config(){
   console.log("Let's set config")
   try{
-    const config = JSON.parse(fs.readFileSync('../meta/config.json'))
+    const config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
     if(config.log.log_enable==1){
       execPromise(`node set_config.js >> ../logs/supervisor.log &`)
       //exec(`node playlist_table_update.js >> ../logs/update_playlist.log`)
@@ -48,10 +48,10 @@ function execPromise(cmd) {
   })
  }
 
-function merge_config() {
+function merge_config(path) {
   try {
-    let main_config = JSON.parse(fs.readFileSync('../meta/config.json'))
-    let new_config = JSON.parse(fs.readFileSync('../data/usb/config.json'))
+    let main_config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
+    let new_config = JSON.parse(fs.readFileSync(path))
 
     for (const property_1 in new_config) {
       for (const property_2 in new_config[property_1]) {
@@ -60,9 +60,10 @@ function merge_config() {
       }
     }
 
-    fs.writeFileSync(('../meta/config.json'), JSON.stringify(main_config, null, 2))
-    fs.unlinkSync('../data/usb/config.json')
-
+    fs.writeFileSync(('../meta/player_config.json'), JSON.stringify(main_config, null, 2))
+    fs.unlinkSync(path)
+    set_config()
+    
   } catch (err) {
     console.log(`merge config fail: ${err}`)
   }
@@ -71,22 +72,28 @@ function merge_config() {
 setTimeout(set_config, 1000)
 
 setTimeout(()=>{
-  usb_watcher.on('change', function (evt, name) {
-    if (fs.existsSync('../data/usb/config.json')) {
-      console.log("Let's merge config")
-      merge_config()
+  // usb_watcher.on('change', function (evt, name) {
+    
+  // })
+  
+  data_watcher.on('change', function (evt, path) {
+    
+    //if (path == '../data/usb/player_config.json') {
+    let name = path.split('/').slice(-1)[0]
+    
+    if(name.slice(0,2)=='sd'){
+      //console.log("Evet path:"+path+" name: "+name+" try: "+name.slice(0,2))
+      if (fs.existsSync(`${path}/player_config.json`)) {
+        console.log(`Let's merge config: ${path}/player_config.json`)
+        merge_config(`${path}/player_config.json`)
+      }
     }
-  })
+
   
-  data_watcher.on('change', function (evt, name) {
-    //console.log("Evet name:"+name)
-    //if (name == '../data/usb/config.json') {
-  
-  
-    if ((file_tools.check_type(name) == 'pic') || (file_tools.check_type(name) == 'video') || (file_tools.check_type(name) == 'sound')) {
+    if ((file_tools.check_type(path) == 'pic') || (file_tools.check_type(path) == 'video') || (file_tools.check_type(path) == 'sound')) {
       try{
         console.log("Let's update content table")
-        const config = JSON.parse(fs.readFileSync('../meta/config.json'))
+        const config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
         if(config.log.log_enable==1){
           execPromise(`node content_table_update.js >> ../logs/supervisor.log &`)
         }else if(config.log.log_enable==0){
@@ -98,10 +105,10 @@ setTimeout(()=>{
     }
   })
   
-  playlist_watcher.on('change', function (evt, name) {
+  playlist_watcher.on('change', function (evt, path) {
     try{
       console.log("Let's update playlists table")
-      const config = JSON.parse(fs.readFileSync('../meta/config.json'))
+      const config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
       if(config.log.log_enable==1){
         execPromise(`node playlist_table_update.js >> ../logs/supervisor.log &`)
         //exec(`node playlist_table_update.js >> ../logs/update_playlist.log`)
@@ -113,9 +120,9 @@ setTimeout(()=>{
     }
   })
   
-  meta_watcher.on('change', function (evt, name) {
+  meta_watcher.on('change', function (evt, path) {
     let flag_busy
-    if ((name == '../meta/config.json')&&(flag_busy=0)) {
+    if ((path == '../meta/player_config.json')&&(flag_busy=0)) {
       console.log("Let's set config")
       flag_busy=1
       set_config()

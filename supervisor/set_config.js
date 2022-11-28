@@ -65,7 +65,7 @@ function execSudoPromise(cmd) {
 
 async function set_config(){
   try{
-    var config = JSON.parse(fs.readFileSync('../meta/config.json'))
+    var config = JSON.parse(fs.readFileSync('../meta/player_config.json'))
   }catch(err){
     console.error(`Error read file: ${err}`)
     //log_file(`Error read file: ${err}`, '../logs/player_log.txt')
@@ -111,7 +111,7 @@ async function set_config(){
         config.net.DNS=rawData[index+1].split(' ')[1]
         console.log("DNS: "+ config.net.DNS)
       }
-      fs.writeFileSync('../meta/config.json', JSON.stringify(config,null,2))
+      fs.writeFileSync('../meta/player_config.json', JSON.stringify(config,null,2))
 
     }catch(err){      
       console.log("Set DHCP fail: "+ err); 

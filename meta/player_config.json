@@ -1,13 +1,11 @@
 {
   "net": {
-    "device": "",
     "DHCP": 0,
-    "IP": " 192.168.88.133",
+    "IP": " 192.168.88.135",
     "net_mask": " 255.255.255.0",
     "gateway": " 192.168.88.1",
     "DNS": "192.168.88.1",
-    "mDNS_name": "playerOk",
-    "ip_adress": " 192.168.88.133"
+    "mDNS_name": "playerok"
   },
   "time": {
     "NTP": 1,
@@ -26,7 +24,7 @@
   },
   "sound": {
     "output_device": "1",
-    "volume": 100
+    "volume": 95
   },
   "screen": {
     "rotation": "0"
