@@ -42,7 +42,7 @@ const mqtt = require("mqtt");
 var currentPage = "home";
 var configAndStatus = "";
 
-const port = +process.env.PORT || 3000
+const port = +process.env.PORT || 80
 
 const app = express();
 const http = app.listen(port);
@@ -582,9 +582,10 @@ function isimage(f) {
 app.get("/", (req, res) => {
   //console.log('curent page is:' + configAndStatus.net.DHCP);
   //console.log('status error'+res.stats.error)
+  let config = JSON.parse(fs.readFileSync('../meta/config.json'))
   res.render("home",{
     pageName: "home",
-    configAndStatus: configAndStatus
+    config: config
   });
 });
 

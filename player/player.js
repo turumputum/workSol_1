@@ -22,7 +22,7 @@ process.on('SIGTERM', () => {
   stop_track(current_track_index)
 
   console.log('Received SIGTERM. Exit.');
-  process.exit()
+  setTimeout(process.exit(),100)
 });
 
 
@@ -51,15 +51,6 @@ setTimeout(()=>{
 // const readline = require('readline');
 // readline.emitKeypressEvents(process.stdin);
 // process.stdin.setRawMode(true);
-try {
-  var config = JSON.parse(fs.readFileSync('../meta/config.json'))
-} catch (err) {
-  console.error(`Error read file: ${err}`)
-  log_file(`Error read file: ${err}`, '../logs/player_log.log')
-  process.exit(1);
-}
-
-
 
 function read_playlist(path) {
   try {
@@ -111,21 +102,21 @@ client.on('connect', function () {
       console.log(`Subscribed stop topic: ${playlist.stop_topic}`)
     }
   }
-  if ((playlist.volume_up_topic != '')&&(playlist.hasOwnProperty('volume_up_topic'))) {
-    if (mqtt_sub(playlist.volume_up_topic.split(' ').slice(0, 1)) === true) {
-      console.log(`Subscribed volume_up topic: ${playlist.volume_up_topic}`)
-    }
-  }
-  if ((playlist.volume_down_topic != '')&&(playlist.hasOwnProperty('volume_down_topic'))) {
-    if (mqtt_sub(playlist.volume_down_topic.split(' ').slice(0, 1)) === true) {
-      console.log(`Subscribed volume_down topic: ${playlist.volume_down_topic}`)
-    }
-  }
-  if ((playlist.volume_val_topic != '')&&(playlist.hasOwnProperty('volume_val_topic'))) {
-    if (mqtt_sub(playlist.volume_val_topic.split(' ').slice(0, 1)) === true) {
-      console.log(`Subscribed volume_val topic: ${playlist.volume_val_topic}`)
-    }
-  }
+  // if ((playlist.volume_up_topic != '')&&(playlist.hasOwnProperty('volume_up_topic'))) {
+  //   if (mqtt_sub(playlist.volume_up_topic.split(' ').slice(0, 1)) === true) {
+  //     console.log(`Subscribed volume_up topic: ${playlist.volume_up_topic}`)
+  //   }
+  // }
+  // if ((playlist.volume_down_topic != '')&&(playlist.hasOwnProperty('volume_down_topic'))) {
+  //   if (mqtt_sub(playlist.volume_down_topic.split(' ').slice(0, 1)) === true) {
+  //     console.log(`Subscribed volume_down topic: ${playlist.volume_down_topic}`)
+  //   }
+  // }
+  // if ((playlist.volume_val_topic != '')&&(playlist.hasOwnProperty('volume_val_topic'))) {
+  //   if (mqtt_sub(playlist.volume_val_topic.split(' ').slice(0, 1)) === true) {
+  //     console.log(`Subscribed volume_val topic: ${playlist.volume_val_topic}`)
+  //   }
+  // }
 
   //-------MQTT-------Subscribe system topics------------------
   if (mqtt_sub('player/next') === true) {
@@ -161,6 +152,7 @@ client.on('connect', function () {
           console.log(`Subscribed triger_off topic: ${topic}`)
         }
       }
+
     }
   })
 
@@ -194,21 +186,21 @@ client.on('message', function (topic, message) {
   if (topic == playlist.stop_topic.split(/[: ]/).slice(0, 1) && (message.toString() == playlist.stop_topic.split(/[: ]/).slice(-1))) {
     stop_track(current_track_index)
   }
-  if (topic == playlist.volume_val_topic.split(/[: ]/).slice(0, 1)) {
-    current_volume = parseInt(message)
-    set_volume(current_volume)
-    console.log(`Mqtt command, set volume: ${current_volume}`)
-  }
-  if (topic == playlist.volume_up_topic.split(/[: ]/).slice(0, 1)) {
-    current_volume += parseInt(message)
-    if (current_volume > 100) { current_volume = 100 }
-    client.publish(playlist.volume_val_topic, `${current_volume}`, { retain: true })
-  }
-  if (topic == playlist.volume_down_topic.split(/[: ]/).slice(0, 1)) {
-    current_volume -= parseInt(message)
-    if (current_volume < 0) { current_volume = 0 }
-    client.publish(playlist.volume_val_topic, `${current_volume}`, { retain: true })
-  }
+  // if (topic == playlist.volume_val_topic.split(/[: ]/).slice(0, 1)) {
+  //   current_volume = parseInt(message)
+  //   set_volume(current_volume)
+  //   console.log(`Mqtt command, set volume: ${current_volume}`)
+  // }
+  // if (topic == playlist.volume_up_topic.split(/[: ]/).slice(0, 1)) {
+  //   current_volume += parseInt(message)
+  //   if (current_volume > 100) { current_volume = 100 }
+  //   client.publish(playlist.volume_val_topic, `${current_volume}`, { retain: true })
+  // }
+  // if (topic == playlist.volume_down_topic.split(/[: ]/).slice(0, 1)) {
+  //   current_volume -= parseInt(message)
+  //   if (current_volume < 0) { current_volume = 0 }
+  //   client.publish(playlist.volume_val_topic, `${current_volume}`, { retain: true })
+  // }
 
   //--------MQTT------Action on system topics------------------
   if ((topic == 'player/next') && (message.toString() == 1)) {
@@ -316,7 +308,13 @@ function set_volume(volume){
 }
 
 function play_track(index) {
-  stop_track(current_track_index)
+
+  if((player_state!='Idle')&&(player_state!='stop')){
+      console.log(`stopped before start< state: ${player_state} `)
+      stop_track(current_track_index)
+  }
+
+  //stop_track(current_track_index)
   try {
     mpvPlayer.load('../' + playlist.tracks[index].path);
     console.log(`lets play: ${playlist.tracks[index].name}`)
@@ -326,18 +324,18 @@ function play_track(index) {
     log_file(`Play track failed: ${playlist.tracks[index].name} Error: ${err}`, '../logs/player_log.log')
     return false
   }
-  if (flag_mqtt_ok == 1) {
-    if ((playlist.tracks[index].pub_on_start != '') && (playlist.tracks[index].type == 'interactive')) {
-      console.log(`start action interactive track: ${playlist.tracks[current_track_index].pub_on_start}`)
-      try {
-        let tmpTopic = playlist.tracks[index].pub_on_start.split(/[: ]/).slice(0, 1)
-        let tmpPayload = playlist.tracks[index].pub_on_start.split(/[: ]/).slice(-1)
-        client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
-      } catch (err) {
-        console.log('publish error' + err)
-      }
-    }
-  }
+  // if (flag_mqtt_ok == 1) {
+  //   if ((playlist.tracks[index].pub_on_start != '') && (playlist.tracks[index].type == 'interactive')) {
+  //     console.log(`start action interactive track: ${playlist.tracks[current_track_index].pub_on_start}`)
+  //     try {
+  //       let tmpTopic = playlist.tracks[index].pub_on_start.split(/[: ]/).slice(0, 1)
+  //       let tmpPayload = playlist.tracks[index].pub_on_start.split(/[: ]/).slice(-1)
+  //       client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
+  //     } catch (err) {
+  //       console.log('publish error' + err)
+  //     }
+  //   }
+  // }
   current_track_index = index
   setTimeout(()=>{
     report_state(player_state = 'Playing')
@@ -365,6 +363,7 @@ function stop_track(index) {
       }
     }
   }
+  console.log('Stop OK')
   report_state(player_state = 'Idle')
   return true
 }
@@ -410,14 +409,29 @@ function shift_simple_track(dir) {
 
 // //mpvPlayer.fullscreen();
 
-
-
+mpvPlayer.on('started', function () {
+  if (flag_mqtt_ok == 1) {
+    if ((playlist.tracks[current_track_index].pub_on_start != '') && (playlist.tracks[current_track_index].type == 'interactive')) {
+      console.log(`start action interactive track: ${playlist.tracks[current_track_index].pub_on_start}`)
+      try {
+        let tmpTopic = playlist.tracks[current_track_index].pub_on_start.split(/[: ]/).slice(0, 1)
+        let tmpPayload = playlist.tracks[current_track_index].pub_on_start.split(/[: ]/).slice(-1)
+        client.publish(tmpTopic[0], tmpPayload[0], { retain: true })
+      } catch (err) {
+        console.log('publish error' + err)
+      }
+    }
+  }
+})
 
 mpvPlayer.on('stopped', function () {
-  if(player_state!='Idle'){
+  if((player_state!='Idle')&&(player_state!='stop')){
+    console.log(`stoppen from event`)
     stop_track(current_track_index)
   }
 
+  console.log(`stopped event`)
+  
   // if (flag_mqtt_ok == 1) {
   //   if (playlist.tracks[current_track_index].pub_on_end != '' && playlist.tracks[current_track_index].type == 'interactive') {
   //     console.log(`end action interactive track: ${playlist.tracks[current_track_index].pub_on_end}`)

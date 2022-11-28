@@ -77,7 +77,7 @@ function check_state() {
     for (var index in scheduler_table) {
         let task = scheduler_table[index]
         
-        if (task.day_of_week.search(`${current_day}`) > 0) {//---------day in list ---------------
+        if (task.day_of_week.search(`${current_day}`) >= 0) {//---------day in list ---------------
             let playlist_start_time_in_minutes = parseInt(task.start_time.split(':')[0]) * 60 + parseInt(task.start_time.split(':')[1])
             if (playlist_start_time_in_minutes <= current_time_in_minutes) {
                 let playlist_end_time_in_minutes = parseInt(task.end_time.split(':')[0]) * 60 + parseInt(task.end_time.split(':')[1])
@@ -128,7 +128,7 @@ playlist_watcher.on('change', function (evt, name) {
     try {
         console.log('Reset playlist on playlist update')
         stop_player()
-        check_state()
+        setTimeout(check_state,500)
     } catch (err) {
         console.error(`: ${err}`)
         process.exit(1);
@@ -167,7 +167,7 @@ client.on('message', function (topic, message) {
     if ((topic =='scheduler/restart')&&(message =='1')){
         console.log('Reset playlist on MQTT command')
         stop_player()
-        check_state()
+        setTimeout(check_state,500)
     }
 })
 

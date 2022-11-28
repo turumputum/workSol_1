@@ -1,13 +1,13 @@
 {
   "net": {
     "device": "",
-    "DHCP": 1,
-    "IP": " 192.168.88.131",
+    "DHCP": 0,
+    "IP": " 192.168.88.133",
     "net_mask": " 255.255.255.0",
     "gateway": " 192.168.88.1",
     "DNS": "192.168.88.1",
-    "mDNS_name": "playerttOk",
-    "ip_adress": "192.168.88.151"
+    "mDNS_name": "playerOk",
+    "ip_adress": " 192.168.88.133"
   },
   "time": {
     "NTP": 1,

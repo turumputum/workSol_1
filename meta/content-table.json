@@ -1,77 +1,7 @@
 {
-  "image": [
-    {
-      "path": "data/22. Windows Logo.jpg",
-      "name": " Windows Logo"
-    },
-    {
-      "path": "data/Tests/123/11. Закат.jpg",
-      "name": " Закат"
-    },
-    {
-      "path": "data/Tests/2. Хаски.jpg",
-      "name": " Хаски"
-    },
-    {
-      "path": "data/Tests/23. Windows Lo55go 2.jpg",
-      "name": " Windows Lo55go 2"
-    },
-    {
-      "path": "data/Tests/656/ggg/15. Облака.jpg",
-      "name": " Облака"
-    },
-    {
-      "path": "data/dsd/4. Кот с наушниками.jpg",
-      "name": " Кот с наушниками"
-    },
-    {
-      "path": "data/Новаяа/14. Листва.jpg",
-      "name": " Листва"
-    },
-    {
-      "path": "data/Новаяа/21. Горjы.jpg",
-      "name": " Горjы"
-    },
-    {
-      "path": "data/Новаяа/5. Белый тигренок.jpg",
-      "name": " Белый тигренок"
-    },
-    {
-      "path": "data/Новаяа/8. Божья коh66ка.jpg",
-      "name": " Божья коh66ка"
-    },
-    {
-      "path": "data/Новаяа/9. Пустыня.jpg",
-      "name": " Пустыня"
-    }
-  ],
-  "video": [
-    {
-      "path": "data/content/video_1.mp4",
-      "name": "video_1"
-    },
-    {
-      "path": "data/content/video_2.mp4",
-      "name": "video_2"
-    },
-    {
-      "path": "data/content/video_3.mp4",
-      "name": "video_3"
-    },
-    {
-      "path": "data/content/video_4.mp4",
-      "name": "video_4"
-    }
-  ],
+  "image": [],
+  "video": [],
   "sound": [
-    {
-      "path": "data/content/monofonEng.mp3",
-      "name": "monofonEng"
-    },
-    {
-      "path": "data/content/monofonRus.mp3",
-      "name": "monofonRus"
-    },
     {
       "path": "data/content/track_1.mp3",
       "name": "track_1"
